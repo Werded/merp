@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="res_users_form_inherit_2fa" model="ir.ui.view">
+        <field name="name">res.users.form.inherit.2fa</field>
+        <field name="model">res.users</field>
+        <field name="inherit_id" ref="base.view_users_form"/>
+        <field name="arch" type="xml">
+            <field name="signature" position="before">
+                <field name="enable_2fa"/>
+                <field name="qr_image_2fa"
+                        widget="image"
+                        attrs="{
+                            'invisible': [('enable_2fa', '=', False)],
+                        }"
+                /> <!-- Some crazy `groups`? (`base.group_no_one`) -->
+            </field>
+        </field>
+    </record>
+
+</odoo>
