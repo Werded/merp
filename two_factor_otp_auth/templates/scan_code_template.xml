@@ -5,13 +5,7 @@
         <t t-call="web.login_layout">
             <div class="container mb-5 pb-5">
                 <div class="text-center small mt-4 pt-3">
-                    <!--
-                        Originally template was mixed up with layout.
-                        To save site's continuity code was replaced with call of standard layout.
 
-                        But still this page required some comments what user should do with QR Code.
-                        Maybe even link to another page with detailed instructions.
-                    -->
                     <form method="post"
                             role="form"
                             t-attf-action="/web/login/{{ '?debug' if debug else '' }}"
@@ -23,7 +17,7 @@
                             </div>
                         </div>
 
-                        <button type="submit" class="btn btn-primary">Submit</button>
+                        <button type="button" class="btn btn-primary">Next</button>
                         <a class="btn btn-danger" href="/web/session/logout">Back</a>
 
                         <input name="csrf_token"

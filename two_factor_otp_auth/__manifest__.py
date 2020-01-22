@@ -2,28 +2,28 @@
 # License LGPL-3.0 or later (https://www.gnu.org/licenses/lgpl-3.0).
 
 {
-    'name': 'Ventor Two Factor Authentication',
-    'summary': 'Two factor authentication for users',
-    'author': 'VentorTech OU',
-    'website': 'http://www.ventor.tech/',
-    'category': 'Uncategorized',
-    'license': 'LGPL-3',
-    'version': '12.0.1.0.0',
-    'depends': [
-        'web',
+    "name": "Ventor Two Factor Authentication",
+    "summary": "Two factor authentication for users",
+    "author": "VentorTech OU",
+    "website": "http://www.ventor.tech/",
+    "category": "Uncategorized",
+    "license": "LGPL-3",
+    "version": "12.0.1.0.0",
+    "depends": [
+        "web",
     ],
-    'data': [
-        'data/ir_actions_server_data.xml',
-        'views/res_users_view.xml',
-        'templates/assets.xml',
-        'templates/verify_code_template.xml',
-        'templates/scan_code_template.xml',
+    "data": [
+        "data/ir_actions_server_data.xml",
+        "views/res_users_view.xml",
+        "templates/assets.xml",
+        "templates/verify_code_template.xml",
+        "templates/scan_code_template.xml",
     ],
-    'external_dependencies': {
-        'python': [
-            'qrcode',
-            'pyotp',
+    "external_dependencies": {
+        "python": [
+            "qrcode",
+            "pyotp",
         ],
     },
-    'installable': True,
+    "installable": True,
 }

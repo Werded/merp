@@ -14,7 +14,7 @@
                                 <h3>
                                     <label for="otp_code">Security code:</label>
                                 </h3>
-                                <!-- be kind with customers and developers - use `autofocus="autofocus"` -->
+
                                 <input id="otp_code"
                                         name="otp_code"
                                         type="text"
