@@ -1,6 +1,3 @@
-# Copyright 2019 VentorTech OU
-# Part of Ventor modules. See LICENSE file for full copyright and licensing details.
-
 from odoo.tests.common import TransactionCase
 from odoo.exceptions import Warning
 
@@ -9,6 +6,7 @@ class TestMerpPickingWaveCore(TransactionCase):
 
     def setUp(self):
         super(TestMerpPickingWaveCore, self).setUp()
+
         self.location_1 = self.env['stock.location'].create({
             'name': 'test_location_1',
             'removal_prio': 2
@@ -17,33 +15,21 @@ class TestMerpPickingWaveCore(TransactionCase):
             'name': 'test_location_2',
             'removal_prio': 3
         })
-        product = self.env['product.product'].search([], limit=1)
         company = self.env.user.company_id
-        move = self.env['stock.move']
 
-        def create_moves(move, state, qty, product):
-            i = 0
-            moves = []
-            while i <= qty:
+        def _update_quants(moves, qty: float):
 
-                stock_move = move.create({
-                    'location_id': self.env.ref('stock.stock_location_stock').id,
-                    'company_id': company.id,
-                    'product_id': product.id,
-                    'state': state,
-                    'product_uom_qty': 45.000,
-                    'name': 'Test',
-                    'product_uom': product.uom_id.id,
-                    'location_dest_id': self.env.ref('stock.stock_location_customers').id
-                })
-                moves.append(stock_move)
-                i += 1
+            location = self.env.ref('stock.stock_location_stock')
+            products = [move.product_id for move in moves]
+            for product in products:
+                self.env['stock.quant']._update_available_quantity(product, location, qty)
             return moves
 
-        self.draft_moves = create_moves(move, 'draft', 4, product)
-        self.confirmed_move = create_moves(move, 'confirmed', 1, product)
-        self.assigned_move = create_moves(move, 'assigned', 1, product)
         self.picking_type = self.env['stock.picking.type'].search([], limit=2)
+        self.stock_move_confirmed = self.env['stock.move'].search([('state', '=', 'confirmed')], limit=1)
+        self.stock_move_assigned = self.env['stock.move'].search([('state', '=', 'assigned')], limit=1)
+        self.stock_move_draft = self.env['stock.move'].search([('state', '=', 'draft')], limit=4)
+        self.stock_move_draft = _update_quants(self.stock_move_draft, 100.0)
         self.procurement_group = self.env['procurement.group'].create({
             'name': 'procurement_group_1',
             'move_type': 'direct'
@@ -70,38 +56,46 @@ class TestMerpPickingWaveCore(TransactionCase):
         })
 
     def test_picking_wave_type(self):
+
         self.assertEqual(self.picking_batch.picking_wave_type.id, self.picking_type[0].id)
 
     def test_done(self):
+
         self.stock_picking_1.write({
-            'move_lines': [(4, self.confirmed_move[0].id), (4, self.assigned_move[0].id)]
+            'move_lines': [(4, self.stock_move_confirmed.id), (4, self.stock_move_assigned.id)]
         })
         self.assertEqual(self.picking_batch.done().get('context').get('sub_done_called'), True)
 
     def test_confirm_picking(self):
+
         self.stock_picking_1.write({
-            'move_lines': [(4, self.draft_moves[0].id), (4, self.draft_moves[1].id)]
+            'move_lines': [(4, self.stock_move_draft[0].id), (4, self.stock_move_draft[1].id)]
         })
         self.picking_batch.confirm_picking()
         self.assertEqual(self.picking_batch.state, 'in_progress')
         self.assertEqual(self.stock_picking_1.state, 'assigned')
-        for stock_move in self.draft_moves[:2]:
+
+        # because stock.moves can be merged we need to check which moves are stayed
+        moves = [move for move in self.stock_move_draft if move in self.stock_picking_1.mapped('move_lines')]
+
+        for stock_move in moves:
             self.assertEqual(stock_move.state, 'assigned')
 
     def test_first_proc_picking(self):
-        for move in self.draft_moves:
-            move.write({
-                'group_id': self.procurement_group.id
-            })
+
+        self.stock_move_draft.write({
+            'group_id': self.procurement_group.id
+        })
         self.stock_picking_1.write({
-            'move_lines': [(4, self.draft_moves[0].id), (4, self.draft_moves[1].id)]
+            'move_lines': [(4, self.stock_move_draft[0].id), (4, self.stock_move_draft[1].id)]
         })
         self.stock_picking_2.write({
-            'move_lines': [(4, self.draft_moves[2].id), (4, self.draft_moves[3].id)]
+            'move_lines': [(4, self.stock_move_draft[2].id), (4, self.stock_move_draft[3].id)]
         })
-        self.assertEqual(self.stock_picking_2.first_proc_picking, self.stock_picking_1)
+        self.assertEqual(self.stock_picking_2.first_proc_picking, self.stock_picking_1.first_proc_picking)
 
     def test_create_stock_picking(self):
+
         self.assertEqual(self.stock_picking_1.batch_id.picking_wave_type.id, self.picking_type[0].id)
         with self.assertRaises(Warning):
             self.env['stock.picking.batch'].create({
@@ -111,6 +105,7 @@ class TestMerpPickingWaveCore(TransactionCase):
             })
 
     def test_write_stock_picking(self):
+
         self.picking_batch.write({
             'picking_wave_type': False
         })
