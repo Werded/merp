@@ -17,11 +17,33 @@ class TestMerpPickingWaveCore(TransactionCase):
             'name': 'test_location_2',
             'removal_prio': 3
         })
+        product = self.env['product.product'].search([], limit=1)
         company = self.env.user.company_id
+        move = self.env['stock.move']
+
+        def create_moves(move, state, qty, product):
+            i = 0
+            moves = []
+            while i <= qty:
+
+                stock_move = move.create({
+                    'location_id': self.env.ref('stock.stock_location_stock').id,
+                    'company_id': company.id,
+                    'product_id': product.id,
+                    'state': state,
+                    'product_uom_qty': 45.000,
+                    'name': 'Test',
+                    'product_uom': product.uom_id.id,
+                    'location_dest_id': self.env.ref('stock.stock_location_customers').id
+                })
+                moves.append(stock_move)
+                i += 1
+            return moves
+
+        self.draft_moves = create_moves(move, 'draft', 4, product)
+        self.confirmed_move = create_moves(move, 'confirmed', 1, product)
+        self.assigned_move = create_moves(move, 'assigned', 1, product)
         self.picking_type = self.env['stock.picking.type'].search([], limit=2)
-        self.stock_move_confirmed = self.env['stock.move'].search([('state', '=', 'confirmed')], limit=1)
-        self.stock_move_assigned = self.env['stock.move'].search([('state', '=', 'assigned')], limit=1)
-        self.stock_move_draft = self.env['stock.move'].search([('state', '=', 'draft')], limit=4)
         self.procurement_group = self.env['procurement.group'].create({
             'name': 'procurement_group_1',
             'move_type': 'direct'
@@ -52,29 +74,30 @@ class TestMerpPickingWaveCore(TransactionCase):
 
     def test_done(self):
         self.stock_picking_1.write({
-            'move_lines': [(4, self.stock_move_confirmed.id), (4, self.stock_move_assigned.id)]
+            'move_lines': [(4, self.confirmed_move[0].id), (4, self.assigned_move[0].id)]
         })
         self.assertEqual(self.picking_batch.done().get('context').get('sub_done_called'), True)
 
     def test_confirm_picking(self):
         self.stock_picking_1.write({
-            'move_lines': [(4, self.stock_move_draft[0].id), (4, self.stock_move_draft[1].id)]
+            'move_lines': [(4, self.draft_moves[0].id), (4, self.draft_moves[1].id)]
         })
         self.picking_batch.confirm_picking()
         self.assertEqual(self.picking_batch.state, 'in_progress')
         self.assertEqual(self.stock_picking_1.state, 'assigned')
-        for stock_move in self.stock_move_draft[:2]:
+        for stock_move in self.draft_moves[:2]:
             self.assertEqual(stock_move.state, 'assigned')
 
     def test_first_proc_picking(self):
-        self.stock_move_draft.write({
-            'group_id': self.procurement_group.id
-        })
+        for move in self.draft_moves:
+            move.write({
+                'group_id': self.procurement_group.id
+            })
         self.stock_picking_1.write({
-            'move_lines': [(4, self.stock_move_draft[0].id), (4, self.stock_move_draft[1].id)]
+            'move_lines': [(4, self.draft_moves[0].id), (4, self.draft_moves[1].id)]
         })
         self.stock_picking_2.write({
-            'move_lines': [(4, self.stock_move_draft[2].id), (4, self.stock_move_draft[3].id)]
+            'move_lines': [(4, self.draft_moves[2].id), (4, self.draft_moves[3].id)]
         })
         self.assertEqual(self.stock_picking_2.first_proc_picking, self.stock_picking_1)
 
