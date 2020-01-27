@@ -16,7 +16,7 @@ class StockPicking(models.Model):
 
         if strategy == 'product':
             return move_line_ids.sorted(key=lambda m: m.product_id.name,
-                                        reverse=int(strategy_order))
+                                        reverse=strategy_order)
 
         return move_line_ids.sorted(
             key=lambda r: getattr(r.location_id, strategy, 'None'),
