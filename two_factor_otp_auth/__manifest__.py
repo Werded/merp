@@ -9,6 +9,7 @@
     "category": "Uncategorized",
     "license": "LGPL-3",
     "version": "12.0.1.0.0",
+    "images": ["static/description/Two_factor_authentification.png"],
     "depends": [
         "web",
     ],
