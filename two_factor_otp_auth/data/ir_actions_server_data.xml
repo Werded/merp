@@ -10,6 +10,7 @@
             <field name="state">code</field>
             <field name="activity_user_type">specific</field>
             <field name="code">action = records.action_enable_2f_auth()</field>
+            <field name="group_id" ref="base.group_erp_manager"/>
         </record>
 
         <record id="ir_actions_server_user_disable_2fa" model="ir.actions.server">
@@ -20,6 +21,7 @@
             <field name="state">code</field>
             <field name="activity_user_type">specific</field>
             <field name="code">action = records.action_disable_2f_auth()</field>
+            <field name="group_id" ref="base.group_erp_manager"/>
         </record>
 
     </data>

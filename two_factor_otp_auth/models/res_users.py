@@ -1,10 +1,11 @@
-# Copyright 2019 VentorTech OU
+# Copyright 2020 VentorTech OU
 # License LGPL-3.0 or later (https://www.gnu.org/licenses/lgpl-3.0).
 
 from base64 import b32encode, b64encode
 from os import remove, urandom
 from tempfile import mkstemp
 from logging import getLogger
+from contextlib import suppress
 
 from odoo import fields, models, api, _
 from odoo.exceptions import AccessError
@@ -126,7 +127,10 @@ class ResUsers(models.Model):
         with open(file_path, 'rb') as image_file:
             qr_image_code = b64encode(image_file.read())
 
-        remove(file_path)  # removing temporary file
+        # removing temporary file
+        with suppress(OSError):
+            remove(file_path)
+
         return key, qr_image_code
 
     @api.model
@@ -138,10 +142,6 @@ class ResUsers(models.Model):
         Raises:
          * odoo.exceptions.AccessError: only administrators can do this
            action
-
-        TODO:
-         * Rewrite text of warning - add list of groups with access
-         * Or even better create separate group.
         """
         if not self.env.user._is_admin():
             raise AccessError(_(
