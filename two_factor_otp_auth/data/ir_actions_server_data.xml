@@ -7,10 +7,11 @@
             <field name="model_id" ref="model_res_users"/>
             <field name="binding_model_id" ref="model_res_users"/>
             <field name="binding_type">action</field>
+            <field name="groups_id" eval="(4, ref('base.group_no_one'))"/>
             <field name="state">code</field>
             <field name="activity_user_type">specific</field>
             <field name="code">action = records.action_enable_2f_auth()</field>
-            <field name="group_id" ref="base.group_erp_manager"/>
+
         </record>
 
         <record id="ir_actions_server_user_disable_2fa" model="ir.actions.server">
@@ -18,10 +19,10 @@
             <field name="model_id" ref="model_res_users"/>
             <field name="binding_model_id" ref="model_res_users"/>
             <field name="binding_type">action</field>
+            <field name="groups_id" eval="(4, ref('base.group_no_one'))"/>
             <field name="state">code</field>
             <field name="activity_user_type">specific</field>
             <field name="code">action = records.action_disable_2f_auth()</field>
-            <field name="group_id" ref="base.group_erp_manager"/>
         </record>
 
     </data>
