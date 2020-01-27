@@ -17,7 +17,7 @@
                             </div>
                         </div>
 
-                        <button type="button" class="btn btn-primary">Next</button>
+                        <button type="submit" class="btn btn-primary">Next</button>
                         <a class="btn btn-danger" href="/web/session/logout">Back</a>
 
                         <input name="csrf_token"

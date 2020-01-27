@@ -11,8 +11,9 @@
                 <field name="qr_image_2fa"
                         widget="image"
                         attrs="{
-                            'invisible': [('enable_2fa', '=', False)],
+                            'invisible': ['|',('enable_2fa', '=', False),('qr_image_2fa', '=', False)],
                         }"
+                       readonly="1"
                 />
             </field>
         </field>
