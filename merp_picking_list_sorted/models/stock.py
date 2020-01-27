@@ -12,7 +12,7 @@ class StockPicking(models.Model):
         """ sort list of pack operations by configured field
         """
         strategy = self.env.user.company_id.outgoing_routing_strategy
-        strategy_order = self.env.user.company_id.outgoing_routing_order
+        strategy_order = int(self.env.user.company_id.outgoing_routing_order)
 
         return move_line_ids.sorted(
             key=lambda r: getattr(r.location_id, strategy, 'None'),
