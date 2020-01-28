@@ -10,8 +10,10 @@
     "license": "LGPL-3",
     "version": "12.0.1.0.0",
     "images": ["static/description/Two_factor_authentification.png"],
+    "installable": True,
     "depends": [
         "web",
+        "merp_base",
     ],
     "data": [
         "data/ir_actions_server_data.xml",
@@ -26,5 +28,4 @@
             "pyotp",
         ],
     },
-    "installable": True,
 }
