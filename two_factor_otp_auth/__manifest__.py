@@ -9,9 +9,11 @@
     "category": "Uncategorized",
     "license": "LGPL-3",
     "version": "12.0.1.0.0",
+    "installable": True,
     "images": ["static/description/Two_factor_authentification.png"],
     "depends": [
         "web",
+        "merp_base",
     ],
     "data": [
         'security/two_factor_otp_auth.xml',
@@ -27,5 +29,4 @@
             "pyotp",
         ],
     },
-    "installable": True,
 }
