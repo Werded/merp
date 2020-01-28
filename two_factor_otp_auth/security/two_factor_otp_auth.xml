@@ -4,7 +4,7 @@
 
         <record id="mass_change_2fa_for_users" model="res.groups">
             <field name="name">Mass Change 2FA Configuration for Users</field>
-            <field name="category_id" ref="base.module_category_hidden"/>
+            <field name="category_id" ref="base.module_category_usability"/>
         </record>
 
     </data>

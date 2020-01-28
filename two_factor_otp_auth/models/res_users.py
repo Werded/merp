@@ -138,14 +138,14 @@ class ResUsers(models.Model):
         """
         Check that current user can make mass actions with Two Factor
         Authentication settings.
-
         Raises:
-         * odoo.exceptions.AccessError: only administrators can do this
-           action
+         * odoo.exceptions.AccessError: only users with "Mass Change 2FA Configuration
+          for Users" rights can do this action
         """
         if not self.env.user.has_group('two_factor_otp_auth.mass_change_2fa_for_users'):
             raise AccessError(_(
-                "Only Administrators can do this operation!"
+                "Only users with 'Mass Change 2FA Configuration"
+                "for Users' rights can do this operation!"
             ))
 
     @staticmethod
@@ -173,3 +173,13 @@ class ResUsers(models.Model):
         if not verify:
             raise InvalidOtpError()
         return True
+
+    @api.multi
+    def write(self, vals):
+        """
+        Overload core method to check access rights for changing 2FA
+        """
+        if 'enable_2fa' in vals:
+            self._can_change_2f_auth_settings()
+
+        return super(ResUsers, self).write(vals)

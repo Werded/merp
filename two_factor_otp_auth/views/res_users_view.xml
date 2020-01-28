@@ -14,6 +14,7 @@
                             'invisible': ['|',('enable_2fa', '=', False),('qr_image_2fa', '=', False)],
                         }"
                        readonly="1"
+                       groups="two_factor_otp_auth.mass_change_2fa_for_users"
                 />
             </field>
         </field>
