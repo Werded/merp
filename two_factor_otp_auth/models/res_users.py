@@ -143,7 +143,7 @@ class ResUsers(models.Model):
          * odoo.exceptions.AccessError: only administrators can do this
            action
         """
-        if not self.has_group('base.group_no_one'):
+        if not self._is_admin():
             raise AccessError(_(
                 "Only Administrators can do this operation!"
             ))
