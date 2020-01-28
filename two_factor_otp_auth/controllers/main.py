@@ -1,4 +1,4 @@
-# Copyright 2019 VentorTech OU
+# Copyright 2020 VentorTech OU
 # License LGPL-3.0 or later (https://www.gnu.org/licenses/lgpl-3.0).
 
 import logging
@@ -26,9 +26,9 @@ class Login2fa(Home):
         try:
             response = super(Login2fa, self).web_login(redirect, **kw)
         except MissingOtpError:
-            # user will coming here while login process is not full successful
-            # come here after success validation of other credentials
-            # to start Second Factor (OTP) validation step
+            # user will get into this block if login process is not fully successful
+            # For example, when first login was successful, but 2FA token is missing
+            # So we can start second authentication step (OTP)
             response = self._get_response()
         except InvalidOtpError:
             message = _("Your security code is wrong")
@@ -53,7 +53,7 @@ class Login2fa(Home):
     @staticmethod
     def _get_response(message=None):
         """
-        Method for getting response object which depending on user and values
+        Method to get response object that depends on user and request params values
 
         argument:
          *message(str) - error message

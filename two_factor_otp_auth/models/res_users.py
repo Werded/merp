@@ -1,10 +1,11 @@
-# Copyright 2019 VentorTech OU
+# Copyright 2020 VentorTech OU
 # License LGPL-3.0 or later (https://www.gnu.org/licenses/lgpl-3.0).
 
 from base64 import b32encode, b64encode
 from os import remove, urandom
 from tempfile import mkstemp
 from logging import getLogger
+from contextlib import suppress
 
 from odoo import fields, models, api, _
 from odoo.exceptions import AccessError
@@ -39,7 +40,7 @@ class ResUsers(models.Model):
         copy=False,
     )
     qr_image_2fa = fields.Binary(
-        string='Two Factor Authentication QR Code',
+        string='Authentication QR Code',
         copy=False,
     )
 
@@ -126,7 +127,10 @@ class ResUsers(models.Model):
         with open(file_path, 'rb') as image_file:
             qr_image_code = b64encode(image_file.read())
 
-        remove(file_path)  # removing temporary file
+        # removing temporary file
+        with suppress(OSError):
+            remove(file_path)
+
         return key, qr_image_code
 
     @api.model
@@ -136,16 +140,13 @@ class ResUsers(models.Model):
         Authentication settings.
 
         Raises:
-         * odoo.exceptions.AccessError: only administrators can do this
-           action
-
-        TODO:
-         * Rewrite text of warning - add list of groups with access
-         * Or even better create separate group.
+         * odoo.exceptions.AccessError: only users with "Mass Change 2FA Configuration
+          for Users" rights can do this action
         """
-        if not self.env.user._is_admin():
+        if not self.env.user.has_group('two_factor_otp_auth.mass_change_2fa_for_users'):
             raise AccessError(_(
-                "Only Administrators can do this operation!"
+                "Only users with 'Mass Change 2FA Configuration"
+                "for Users' rights can do this operation!"
             ))
 
     @staticmethod
@@ -156,8 +157,7 @@ class ResUsers(models.Model):
 
         Args:
          * otp(str/integer) - one time password
-         * secret(str) - origin secret of QR Code for one time password
-           generator
+         * secret(str) - origin secret of QR Code for one time password generator
 
         Raises:
          * odoo.addons.two_factor_otp_auth.exceptions.InvalidOtpError -
@@ -173,3 +173,12 @@ class ResUsers(models.Model):
         if not verify:
             raise InvalidOtpError()
         return True
+
+    def write(self, vals):
+        """
+        Overload core method to check access rights for changing 2FA
+        """
+        if 'enable_2fa' in vals:
+            self._can_change_2f_auth_settings()
+
+        return super(ResUsers, self).write(vals)
