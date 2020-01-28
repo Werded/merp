@@ -143,7 +143,7 @@ class ResUsers(models.Model):
          * odoo.exceptions.AccessError: only administrators can do this
            action
         """
-        if not self._is_admin():
+        if not self.env.user.has_group('two_factor_otp_auth.mass_change_2fa_for_users'):
             raise AccessError(_(
                 "Only Administrators can do this operation!"
             ))
