@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<odoo noupdate="0">
+<odoo>
 
         <record id="ir_actions_server_user_enable_2fa" model="ir.actions.server">
             <field name="name">Enable Two Factor Auth</field>

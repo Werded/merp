@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<odoo noupdate="0">
+<odoo>
 
         <record id="mass_change_2fa_for_users" model="res.groups">
             <field name="name">Mass Change 2FA Configuration for Users</field>

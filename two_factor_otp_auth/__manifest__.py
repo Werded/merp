@@ -13,7 +13,9 @@
         "static/description/Two_factor_authentification.png",
     ],
     "installable": True,
-    "depends": [],
+    "depends": [
+        "base",
+    ],
     "data": [
         "security/two_factor_otp_auth.xml",
         "data/ir_actions_server_data.xml",
