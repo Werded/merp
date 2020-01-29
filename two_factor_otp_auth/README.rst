@@ -16,7 +16,7 @@ Installation
 Authors
 ~~~~~~~
 
-* VentorTech OU
+* VentorTech OU <hello@ventor.tech>
 
 Contributors
 ~~~~~~~~~~~~

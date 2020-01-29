@@ -9,13 +9,13 @@
     "category": "Uncategorized",
     "license": "LGPL-3",
     "version": "12.0.1.0.0",
-    "images": ["static/description/Two_factor_authentification.png"],
-    "installable": True,
-    "depends": [
-        "web",
-        "merp_base",
+    "images": [
+        "static/description/Two_factor_authentification.png",
     ],
+    "installable": True,
+    "depends": [],
     "data": [
+        "security/two_factor_otp_auth.xml",
         "data/ir_actions_server_data.xml",
         "views/res_users_view.xml",
         "templates/assets.xml",

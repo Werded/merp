@@ -1,17 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
-<odoo>
-    <data noupdate="1">
+<odoo noupdate="0">
 
         <record id="ir_actions_server_user_enable_2fa" model="ir.actions.server">
             <field name="name">Enable Two Factor Auth</field>
             <field name="model_id" ref="model_res_users"/>
             <field name="binding_model_id" ref="model_res_users"/>
             <field name="binding_type">action</field>
-            <field name="groups_id" eval="[(4, ref('two_factor_otp_auth.mass_change_2fa_for_users'))]"/>
             <field name="state">code</field>
             <field name="activity_user_type">specific</field>
             <field name="code">action = records.action_enable_2f_auth()</field>
-
         </record>
 
         <record id="ir_actions_server_user_disable_2fa" model="ir.actions.server">
@@ -19,11 +16,9 @@
             <field name="model_id" ref="model_res_users"/>
             <field name="binding_model_id" ref="model_res_users"/>
             <field name="binding_type">action</field>
-            <field name="groups_id" eval="[(4, ref('two_factor_otp_auth.mass_change_2fa_for_users'))]"/>
             <field name="state">code</field>
             <field name="activity_user_type">specific</field>
             <field name="code">action = records.action_disable_2f_auth()</field>
         </record>
 
-    </data>
 </odoo>

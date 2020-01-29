@@ -48,6 +48,7 @@ class StockConfigSettings(models.TransientModel):
         compute='_compute_merp_version',
         store=False,
     )
+
     module_two_factor_otp_auth = fields.Boolean(
         string='Use Two Factor Authentication'
     )
