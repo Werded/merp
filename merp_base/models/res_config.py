@@ -50,7 +50,7 @@ class StockConfigSettings(models.TransientModel):
     )
 
     module_two_factor_otp_auth = fields.Boolean(
-        string='Use Two Factor Authentication'
+        string='Use Two Factor Authentication',
     )
 
     @api.depends('company_id')
