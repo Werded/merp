@@ -153,7 +153,7 @@ class ResUsers(models.Model):
         """
         if not user.has_group("two_factor_otp_auth.mass_change_2fa_for_users"):
             raise AccessError(_(
-                "Only users with 'Mass Change 2FA Configuration"
+                "Only users with 'Mass Change 2FA Configuration "
                 "for Users' rights can do this operation!"
             ))
 
