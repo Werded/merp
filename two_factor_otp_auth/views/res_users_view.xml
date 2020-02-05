@@ -11,10 +11,14 @@
                 <field name="qr_image_2fa"
                         widget="image"
                         attrs="{
-                            'invisible': ['|',('enable_2fa', '=', False),('qr_image_2fa', '=', False)],
+                            'invisible': [
+                            '|',
+                                ('enable_2fa', '=', False),
+                                ('qr_image_2fa', '=', False),
+                            ],
                         }"
-                       groups="two_factor_otp_auth.mass_change_2fa_for_users"
                        readonly="1"
+                       groups="two_factor_otp_auth.mass_change_2fa_for_users"
                 />
             </field>
         </field>
@@ -26,8 +30,7 @@
         <field name="inherit_id" ref="base.view_users_tree"/>
         <field name="arch" type="xml">
             <field name="login_date" position="after">
-                <field name="enable_2fa"
-                       widget="checkbox"/>
+                <field name="enable_2fa"/>
             </field>
         </field>
     </record>

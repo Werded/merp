@@ -7,10 +7,11 @@ from tempfile import mkstemp
 from logging import getLogger
 from contextlib import suppress
 
-from odoo import fields, models, api, _
+from odoo import fields, models, _
 from odoo.exceptions import AccessError
 from odoo.http import request
 
+from ..exceptions import MissingOtpError, InvalidOtpError
 
 _logger = getLogger(__name__)
 
@@ -21,28 +22,33 @@ try:
 except ImportError as error:
     _logger.debug(error)
 
-try:
-    from ..exceptions import MissingOtpError, InvalidOtpError
-
-except IOError as err:
-    _logger.debug(err)
-
 
 class ResUsers(models.Model):
-    _inherit = 'res.users'
+    _inherit = "res.users"
 
     enable_2fa = fields.Boolean(
-        string='Two Factor Authentication',
+        string="Two Factor Authentication",
         inverse="_inverse_enable_2fa",
     )
     secret_code_2fa = fields.Char(
-        string='Two Factor Authentication Secret Code',
+        string="Two Factor Authentication Secret Code",
         copy=False,
     )
     qr_image_2fa = fields.Binary(
-        string='Authentication QR Code',
+        string="Two Factor Authentication QR Code",
         copy=False,
     )
+
+    def write(self, vals):
+        """
+        Overload core method to check access rights for changing 2FA.
+        If `enable_2fa` in `vals` check access for action
+        via `_can_change_2f_auth_settings`.
+        """
+        if "enable_2fa" in vals:
+            self._can_change_2f_auth_settings(self.env.user)
+
+        return super(ResUsers, self).write(vals)
 
     def _inverse_enable_2fa(self):
         """
@@ -55,7 +61,11 @@ class ResUsers(models.Model):
 
     def action_discard_2f_auth_credentials(self):
         """
-        Remove values from fields `qr_image_2fa`, `auth_secret_code_2fa`
+        Remove values from fields `qr_image_2fa`, `auth_secret_code_2fa`.
+        This method calling when value of the field `enable_2fa` become `false`.
+        Field `enable_2fa` can be changed only after checking rights for this action
+        in method `write` and no need to check rights for
+        `action_discard_2f_auth_credentials`.
         """
         values = {
             "qr_image_2fa": False,
@@ -65,10 +75,8 @@ class ResUsers(models.Model):
 
     def action_disable_2f_auth(self):
         """
-        Set `enable_2fa` field value to `False`. Check access for action
-        via `_can_change_2f_auth_settings`.
+        Set `enable_2fa` field value to `False`.
         """
-        self._can_change_2f_auth_settings()
         values = {
             "enable_2fa": False,
         }
@@ -76,10 +84,8 @@ class ResUsers(models.Model):
 
     def action_enable_2f_auth(self):
         """
-        Set `enable_2fa` field value to `False`. Check access for action
-        via `_can_change_2f_auth_settings`.
+        Set `enable_2fa` field value to `False`.
         """
-        self._can_change_2f_auth_settings()
         values = {
             "enable_2fa": True,
         }
@@ -87,9 +93,7 @@ class ResUsers(models.Model):
 
     def _check_credentials(self, password):
         """
-        Overload core method to also check Two Factor Authentication
-        credentials.
-
+        Overload core method to also check Two Factor Authentication credentials.
         Raises:
          * odoo.addons.two_factor_otp_auth.exceptions.MissingOtpError - no
             `otp_code` in request params. Should be caught by controller and
@@ -113,7 +117,6 @@ class ResUsers(models.Model):
     def _generate_secrets(self):
         """
         Generate QR-Code based on random set of letters
-
         Returns:
          * tuple - generated secret_code and binary qr-code
         """
@@ -124,7 +127,7 @@ class ResUsers(models.Model):
         _, file_path = mkstemp()  # creating temporary file
         img.save(file_path)
 
-        with open(file_path, 'rb') as image_file:
+        with open(file_path, "rb") as image_file:
             qr_image_code = b64encode(image_file.read())
 
         # removing temporary file
@@ -133,19 +136,19 @@ class ResUsers(models.Model):
 
         return key, qr_image_code
 
-    @api.model
-    def _can_change_2f_auth_settings(self):
+    @staticmethod
+    def _can_change_2f_auth_settings(user):
         """
-        Check that current user can make mass actions with Two Factor
-        Authentication settings.
-
+        Checking that user can make mass actions with 2FA settings.
+        Argument:
+        * user - `res.users` object
         Raises:
-         * odoo.exceptions.AccessError: only users with "Mass Change 2FA Configuration
-          for Users" rights can do this action
+         * odoo.exceptions.AccessError: only users with `Mass Change 2FA Configuration
+          for Users` rights can do this action
         """
-        if not self.env.user.has_group('two_factor_otp_auth.mass_change_2fa_for_users'):
+        if not user.has_group("two_factor_otp_auth.mass_change_2fa_for_users"):
             raise AccessError(_(
-                "Only users with 'Mass Change 2FA Configuration"
+                "Only users with 'Mass Change 2FA Configuration "
                 "for Users' rights can do this operation!"
             ))
 
@@ -154,16 +157,14 @@ class ResUsers(models.Model):
         """
         Validate incoming one time password `otp` witch secret via `pyotp`
         library methods.
-
         Args:
          * otp(str/integer) - one time password
-         * secret(str) - origin secret of QR Code for one time password generator
-
+         * secret(str) - origin secret of QR Code for one time password
+           generator
         Raises:
          * odoo.addons.two_factor_otp_auth.exceptions.InvalidOtpError -
             one-time-password. Should be caught by controller and return user
             to enter "one-time-password" page
-
         Returns:
          * bool - True
         """
@@ -173,12 +174,3 @@ class ResUsers(models.Model):
         if not verify:
             raise InvalidOtpError()
         return True
-
-    def write(self, vals):
-        """
-        Overload core method to check access rights for changing 2FA
-        """
-        if 'enable_2fa' in vals:
-            self._can_change_2f_auth_settings()
-
-        return super(ResUsers, self).write(vals)

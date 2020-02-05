@@ -1,19 +1,11 @@
 # Copyright 2020 VentorTech OU
 # License LGPL-3.0 or later (https://www.gnu.org/licenses/lgpl-3.0).
 
-import logging
-
 from odoo import http, _
 from odoo.addons.web.controllers.main import Home
 from odoo.http import request
 
-_logger = logging.getLogger(__name__)
-
-try:
-    from ..exceptions import MissingOtpError, InvalidOtpError
-
-except IOError as error:
-    _logger.debug(error)
+from ..exceptions import MissingOtpError, InvalidOtpError
 
 
 class Login2fa(Home):
@@ -29,10 +21,10 @@ class Login2fa(Home):
             # user will get into this block if login process is not fully successful
             # For example, when first login was successful, but 2FA token is missing
             # So we can start second authentication step (OTP)
-            response = self._get_response()
+            response = self._redirect_to_2fa()
         except InvalidOtpError:
             message = _("Your security code is wrong")
-            response = self._get_response(message)
+            response = self._redirect_to_2fa(message)
         else:
             params = request.params
             if params.get("login_success"):
@@ -51,20 +43,18 @@ class Login2fa(Home):
         return response
 
     @staticmethod
-    def _get_response(message=None):
+    def _redirect_to_2fa(message=None):
         """
         Method to get response object that depends on user and request params values
-
         argument:
          *message(str) - error message
-
         Returns:
          *response object
         """
         values = request.params.copy()
         if message:
             values.update({
-                'error': message
+                "error": message,
             })
         user_id = request.session.otk_uid
         user = request.env["res.users"].sudo().browse(user_id)
